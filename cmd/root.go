@@ -25,10 +25,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ArchitBhonsle/cp-bot/webscaper"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/ArchitBhonsle/cp-bot/logic"
 )
 
 var cfgFile string
@@ -46,7 +47,7 @@ var rootCmd = &cobra.Command{
 	`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		webscaper.Problems(args[0])
+		logic.GetContest(args[0])
 	},
 }
 
