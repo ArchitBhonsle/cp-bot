@@ -16,8 +16,6 @@ func getWebsiteFromHostname(hostname string) types.Website {
 	switch websiteName {
 	case "codeforces":
 		return types.Codeforces
-	case "codechef":
-		return types.Codechef
 	case "atcoder":
 		return types.Atcoder
 	default:
@@ -39,10 +37,8 @@ func GetContest(rawurl string) (types.Contest, error) {
 	switch website {
 	case types.Atcoder:
 		contest = scraping.GetAtcoderProblems(contestID)
-	case types.Codechef:
-		scraping.GetCodechefProblems(contestID)
 	case types.Codeforces:
-		scraping.GetCodeforcesProblems(contestID)
+		contest = scraping.GetCodeforcesProblems(contestID)
 	}
 
 	sync := make(chan bool)
@@ -66,9 +62,6 @@ func getContestIDFromPath(path string, website types.Website) string {
 	switch website {
 	case types.Atcoder:
 		regex := regexp.MustCompile(`/contests/(\w+)`)
-		return regex.FindStringSubmatch(path)[1]
-	case types.Codechef:
-		regex := regexp.MustCompile(`/(\w+)`)
 		return regex.FindStringSubmatch(path)[1]
 	case types.Codeforces:
 		regex := regexp.MustCompile(`/contest/(\w+)`)
