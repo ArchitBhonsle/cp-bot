@@ -1,47 +1,32 @@
 package logic
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 
 	"github.com/ArchitBhonsle/cp-bot/logic/scraping"
+	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
-// Website stores what website the problem is from
-type Website int
-
-const (
-	// Invalid if the website isn't supported
-	Invalid Website = iota
-	// Atcoder if url is of the form https://atcoder.jp/contests/<contest-id>
-	Atcoder
-	// Codechef if url is of the form https://www.codechef.com/<contest-id>
-	Codechef
-	// Codeforces if url is of the form https://codeforces.com/contest/<contest-id>
-	Codeforces
-)
-
-func getWebsiteFromHostname(hostname string) Website {
+func getWebsiteFromHostname(hostname string) types.Website {
 	regex := regexp.MustCompile(`(?:\w*\.)?(\w*)(?:\.\w*)`)
 
 	websiteName := regex.FindStringSubmatch(hostname)[1]
 	switch websiteName {
 	case "codeforces":
-		return Codeforces
+		return types.Codeforces
 	case "codechef":
-		return Codechef
+		return types.Codechef
 	case "atcoder":
-		return Atcoder
+		return types.Atcoder
 	default:
-		return Invalid
+		return types.Invalid
 	}
 }
 
-// Contest is a slice of Problems
-type Contest []Problem
-
 // GetContest returns a Contest parsed from the URL
-func GetContest(rawurl string) (Contest, error) {
+func GetContest(rawurl string) (types.Contest, error) {
 	parsedURL, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
@@ -49,27 +34,43 @@ func GetContest(rawurl string) (Contest, error) {
 
 	website := getWebsiteFromHostname(parsedURL.Hostname())
 	contestID := getContestIDFromPath(parsedURL.EscapedPath(), website)
+
+	var contest types.Contest
 	switch website {
-	case Atcoder:
-		scraping.GetAtcoderProblems(contestID)
-	case Codechef:
+	case types.Atcoder:
+		contest = scraping.GetAtcoderProblems(contestID)
+	case types.Codechef:
 		scraping.GetCodechefProblems(contestID)
-	case Codeforces:
+	case types.Codeforces:
 		scraping.GetCodeforcesProblems(contestID)
+	}
+
+	sync := make(chan bool)
+	for _, problem := range contest {
+		problemInfo := problem.GetInfo()
+		fmt.Println("------------")
+		fmt.Printf("%v %v\n", problemInfo.Contest, problemInfo.Problem)
+
+		testCases := problem.Scrape(sync)
+		for _, testCase := range testCases {
+			fmt.Println("------------")
+			fmt.Println(testCase.Input)
+			fmt.Println(testCase.Output)
+		}
 	}
 
 	return nil, nil
 }
 
-func getContestIDFromPath(path string, website Website) string {
+func getContestIDFromPath(path string, website types.Website) string {
 	switch website {
-	case Atcoder:
+	case types.Atcoder:
 		regex := regexp.MustCompile(`/contests/(\w+)`)
 		return regex.FindStringSubmatch(path)[1]
-	case Codechef:
+	case types.Codechef:
 		regex := regexp.MustCompile(`/(\w+)`)
 		return regex.FindStringSubmatch(path)[1]
-	case Codeforces:
+	case types.Codeforces:
 		regex := regexp.MustCompile(`/contest/(\w+)`)
 		return regex.FindStringSubmatch(path)[1]
 	default:
