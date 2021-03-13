@@ -41,7 +41,7 @@ func GetAtcoderProblems(contestID string) types.Contest {
 const acTestcasesSelector = "span.lang-en h3+pre"
 
 // Scrape will get the problem's inputs and corresponding outputs
-func (p *AtcoderProblem) Scrape(send chan *types.FetchedProblem) {
+func (p *AtcoderProblem) Fetch(send chan *types.FetchedProblem) {
 	var inputsAndOutputs []string
 	collector := colly.NewCollector()
 

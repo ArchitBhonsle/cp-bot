@@ -40,7 +40,7 @@ func GetCodeforcesProblems(contestID string) types.Contest {
 const cfTestcasesSelector = "div.sample-tests div.sample-test"
 
 // Scrape will get the problem's inputs and corresponding outputs
-func (p *CodeforcesProblem) Scrape(send chan *types.FetchedProblem) {
+func (p *CodeforcesProblem) Fetch(send chan *types.FetchedProblem) {
 	var testcases []types.Testcase
 	collector := colly.NewCollector()
 

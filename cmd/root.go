@@ -51,20 +51,20 @@ var rootCmd = &cobra.Command{
 		contest, _ := scraping.GetContest(args[0])
 		send := make(chan *types.FetchedProblem, len(contest))
 		for _, problem := range contest {
-			go problem.Scrape(send)
+			go problem.Fetch(send)
 		}
 
 		for i := 1; i <= len(contest); i += 1 {
 			fetchedProblem := <-send
-			println("--------------")
+			// println("--------------")
 			println(i, fetchedProblem.ProblemInfo.Contest, fetchedProblem.ProblemInfo.Problem)
-			println("--------------")
-			for _, testcase := range fetchedProblem.Testcases {
-				println(testcase.Input)
-				println("--------------")
-				println(testcase.Output)
-				println("--------------")
-			}
+			// println("--------------")
+			// for _, testcase := range fetchedProblem.Testcases {
+			// 	println(testcase.Input)
+			// 	println("--------------")
+			// 	println(testcase.Output)
+			// 	println("--------------")
+			// }
 		}
 	},
 }

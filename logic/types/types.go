@@ -9,7 +9,7 @@ type ProblemInfo struct {
 
 // Problem stores the data about a problem
 type Problem interface {
-	Scrape(chan *FetchedProblem)
+	Fetch(chan *FetchedProblem)
 	GetInfo() *ProblemInfo
 }
 
