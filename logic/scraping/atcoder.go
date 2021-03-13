@@ -19,11 +19,16 @@ type AtcoderProblem struct {
 const acProblemsSelector = "tbody > tr > td:first-child > a"
 
 // GetAtcoderProblems given a contest_id will scrape it's problems
-func GetAtcoderProblems(contestID string) types.Contest {
+func GetAtcoderProblems(contestID string) (types.Contest, error) {
 	tasksListURL := fmt.Sprintf("https://atcoder.jp/contests/%v/tasks", contestID)
 
 	var contest types.Contest
+	var err error
 	collector := colly.NewCollector()
+
+	collector.OnError(func(_r *colly.Response, collyError error) {
+		err = collyError
+	})
 
 	collector.OnHTML(acProblemsSelector, func(e *colly.HTMLElement) {
 		contest = append(contest, &AtcoderProblem{
@@ -35,10 +40,10 @@ func GetAtcoderProblems(contestID string) types.Contest {
 
 	collector.Visit(tasksListURL)
 
-	return contest
+	return contest, err
 }
 
-const acTestcasesSelector = "span.lang-en h3+pre"
+const acTestcasesSelector = "span.lang-en h3 + pre"
 
 // Scrape will get the problem's inputs and corresponding outputs
 func (p *AtcoderProblem) Fetch(send chan *types.FetchedProblem) {

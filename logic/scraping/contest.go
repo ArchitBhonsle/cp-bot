@@ -1,6 +1,7 @@
 package scraping
 
 import (
+	"errors"
 	"net/url"
 	"regexp"
 
@@ -23,23 +24,26 @@ func getWebsiteFromHostname(hostname string) types.Website {
 
 // GetContest returns a Contest parsed from the URL
 func GetContest(rawurl string) (types.Contest, error) {
-	parsedURL, err := url.Parse(rawurl)
-	if err != nil {
-		return nil, err
+	parsedURL, parseErr := url.Parse(rawurl)
+	if parseErr != nil {
+		return nil, parseErr
 	}
 
 	website := getWebsiteFromHostname(parsedURL.Hostname())
 	contestID := getContestIDFromPath(parsedURL.EscapedPath(), website)
 
 	var contest types.Contest
+	var err error
 	switch website {
 	case types.Atcoder:
-		contest = GetAtcoderProblems(contestID)
+		contest, err = GetAtcoderProblems(contestID)
 	case types.Codeforces:
-		contest = GetCodeforcesProblems(contestID)
+		contest, err = GetCodeforcesProblems(contestID)
+	default:
+		contest, err = nil, errors.New("website not supported")
 	}
 
-	return contest, nil
+	return contest, err
 }
 
 func getContestIDFromPath(path string, website types.Website) string {

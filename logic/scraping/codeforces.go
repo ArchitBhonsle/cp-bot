@@ -18,12 +18,17 @@ type CodeforcesProblem struct {
 const cfProblemsSelector = "table.problems > tbody > tr > td:nth-of-type(1) > a"
 
 // GetCodeforcesProblems given a contest_id will scrape it's problems
-func GetCodeforcesProblems(contestID string) types.Contest {
+func GetCodeforcesProblems(contestID string) (types.Contest, error) {
 	contestURL := fmt.Sprintf("https://codeforces.com/contest/%v", contestID)
 
 	var contest types.Contest
+	var err error
 	collector := colly.NewCollector()
 
+	collector.OnError(func(_r *colly.Response, collyError error) {
+		err = collyError
+	})
+	
 	collector.OnHTML(cfProblemsSelector, func(e *colly.HTMLElement) {
 		contest = append(contest, &CodeforcesProblem{
 			contest: contestID,
@@ -34,7 +39,7 @@ func GetCodeforcesProblems(contestID string) types.Contest {
 
 	collector.Visit(contestURL)
 
-	return contest
+	return contest, err
 }
 
 const cfTestcasesSelector = "div.sample-tests div.sample-test"
