@@ -9,8 +9,14 @@ type ProblemInfo struct {
 
 // Problem stores the data about a problem
 type Problem interface {
-	Scrape(chan bool) []Testcase
-	GetInfo() ProblemInfo
+	Scrape(chan *FetchedProblem)
+	GetInfo() *ProblemInfo
+}
+
+// FetchedProblem has the path to save the problem to and it's testcases
+type FetchedProblem struct {
+	ProblemInfo *ProblemInfo
+	Testcases   []Testcase
 }
 
 // Testcase represents a single test case made of input and output

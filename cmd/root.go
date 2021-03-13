@@ -29,7 +29,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/ArchitBhonsle/cp-bot/logic"
+	"github.com/ArchitBhonsle/cp-bot/logic/scraping"
+	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
 var cfgFile string
@@ -47,7 +48,24 @@ var rootCmd = &cobra.Command{
 	`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		logic.GetContest(args[0])
+		contest, _ := scraping.GetContest(args[0])
+		send := make(chan *types.FetchedProblem, len(contest))
+		for _, problem := range contest {
+			go problem.Scrape(send)
+		}
+
+		for i := 1; i <= len(contest); i += 1 {
+			fetchedProblem := <-send
+			println("--------------")
+			println(i, fetchedProblem.ProblemInfo.Contest, fetchedProblem.ProblemInfo.Problem)
+			println("--------------")
+			for _, testcase := range fetchedProblem.Testcases {
+				println(testcase.Input)
+				println("--------------")
+				println(testcase.Output)
+				println("--------------")
+			}
+		}
 	},
 }
 

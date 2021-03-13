@@ -1,11 +1,9 @@
-package logic
+package scraping
 
 import (
-	"fmt"
 	"net/url"
 	"regexp"
 
-	"github.com/ArchitBhonsle/cp-bot/logic/scraping"
 	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
@@ -36,26 +34,12 @@ func GetContest(rawurl string) (types.Contest, error) {
 	var contest types.Contest
 	switch website {
 	case types.Atcoder:
-		contest = scraping.GetAtcoderProblems(contestID)
+		contest = GetAtcoderProblems(contestID)
 	case types.Codeforces:
-		contest = scraping.GetCodeforcesProblems(contestID)
+		contest = GetCodeforcesProblems(contestID)
 	}
 
-	sync := make(chan bool)
-	for _, problem := range contest {
-		problemInfo := problem.GetInfo()
-		fmt.Println("------------")
-		fmt.Printf("%v %v\n", problemInfo.Contest, problemInfo.Problem)
-
-		testCases := problem.Scrape(sync)
-		for _, testCase := range testCases {
-			fmt.Println("------------")
-			fmt.Println(testCase.Input)
-			fmt.Println(testCase.Output)
-		}
-	}
-
-	return nil, nil
+	return contest, nil
 }
 
 func getContestIDFromPath(path string, website types.Website) string {

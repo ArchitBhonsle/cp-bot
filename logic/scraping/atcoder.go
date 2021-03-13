@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gocolly/colly"
-	
+
 	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
@@ -41,7 +41,7 @@ func GetAtcoderProblems(contestID string) types.Contest {
 const acTestcasesSelector = "span.lang-en h3+pre"
 
 // Scrape will get the problem's inputs and corresponding outputs
-func (p *AtcoderProblem) Scrape(sync chan bool) []types.Testcase {
+func (p *AtcoderProblem) Scrape(send chan *types.FetchedProblem) {
 	var inputsAndOutputs []string
 	collector := colly.NewCollector()
 
@@ -59,12 +59,15 @@ func (p *AtcoderProblem) Scrape(sync chan bool) []types.Testcase {
 		})
 	}
 
-	return testcases
+	send <- &types.FetchedProblem{
+		ProblemInfo: p.GetInfo(),
+		Testcases:   testcases,
+	}
 }
 
 // GetInfo returns the corresponding problem's metadata
-func (p *AtcoderProblem) GetInfo() types.ProblemInfo {
-	return types.ProblemInfo{
+func (p *AtcoderProblem) GetInfo() *types.ProblemInfo {
+	return &types.ProblemInfo{
 		Contest: p.contest,
 		Problem: p.problem,
 		URL:     p.url,

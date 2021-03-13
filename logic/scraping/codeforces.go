@@ -40,7 +40,7 @@ func GetCodeforcesProblems(contestID string) types.Contest {
 const cfTestcasesSelector = "div.sample-tests div.sample-test"
 
 // Scrape will get the problem's inputs and corresponding outputs
-func (p *CodeforcesProblem) Scrape(sync chan bool) []types.Testcase {
+func (p *CodeforcesProblem) Scrape(send chan *types.FetchedProblem) {
 	var testcases []types.Testcase
 	collector := colly.NewCollector()
 
@@ -53,12 +53,15 @@ func (p *CodeforcesProblem) Scrape(sync chan bool) []types.Testcase {
 
 	collector.Visit(p.url)
 
-	return testcases
+	send <- &types.FetchedProblem{
+		ProblemInfo: p.GetInfo(),
+		Testcases:   testcases,
+	}
 }
 
 // GetInfo returns the corresponding problem's metadata
-func (p *CodeforcesProblem) GetInfo() types.ProblemInfo {
-	return types.ProblemInfo{
+func (p *CodeforcesProblem) GetInfo() *types.ProblemInfo {
+	return &types.ProblemInfo{
 		Contest: p.contest,
 		Problem: p.problem,
 		URL:     p.url,
