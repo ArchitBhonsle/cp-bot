@@ -36,22 +36,21 @@ import (
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "cp-bot [args]",
+	Use:   "cp-bot [args] [flags]",
 	Short: "A tool for simplifying getting started with a competitive programming contest.",
 	Long: `This is a command line tool written in golang to streamline the process of
-	participating in a competitive programming contest. The command can be used as follows:
+participating in a competitive programming contest. The command can be used as follows:
 
-	cp-bot https://codeforces.com/contest/1498
-	cp-bot www.codechef.com/MARCH21B/
-	cp-bot atcoder.jp/contests/arc114/
+cp-bot https://codeforces.com/contest/1498
+cp-bot atcoder.jp/contests/arc114/
 	`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		println(viper.GetString("directory"), viper.GetString("template"))
+	RunE: func(cmd *cobra.Command, args []string) error {
 		contest, err := scraping.GetContest(args[0])
-		cobra.CheckErr(err)
+		if err != nil {
+			return err
+		}
 
 		send := make(chan *types.FetchedProblem, len(contest))
 		for _, problem := range contest {
@@ -60,13 +59,20 @@ var rootCmd = &cobra.Command{
 
 		for i := 1; i <= len(contest); i += 1 {
 			fetchedProblem := <-send
+			println("------------")
 			println(i, fileops.ProblemPath(fetchedProblem.ProblemInfo))
+			for _, testcase := range fetchedProblem.Testcases {
+				println("------------")
+				println(testcase.Input)
+				println(testcase.Output)
+				println("------------")
+			}
 		}
+
+		return nil
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
@@ -77,23 +83,20 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cp-bot.yaml)")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".cp-bot" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".cp-bot")
 		viper.SetConfigType("yaml")
 	}
 
-	// If a config file is found, read it in.
+	viper.AutomaticEnv()
+
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}

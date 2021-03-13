@@ -11,9 +11,9 @@ func ProblemPath(problemInfo *types.ProblemInfo) string {
 	var website string
 	switch problemInfo.Website {
 	case types.Atcoder:
-		website = "codeforces"
-	case types.Codeforces:
 		website = "atcoder"
+	case types.Codeforces:
+		website = "coderforces"
 	}
 
 	path := fmt.Sprintf("%v/%v/%v", website, problemInfo.Contest, problemInfo.Problem)

@@ -8,53 +8,69 @@ import (
 	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
-func getWebsiteFromHostname(hostname string) types.Website {
+func getWebsiteFromHostname(hostname string) (types.Website, error) {
 	regex := regexp.MustCompile(`(?:\w*\.)?(\w*)(?:\.\w*)`)
+	matches := regex.FindStringSubmatch(hostname)
+	if len(matches) != 2 {
+		return types.Invalid, errors.New("website couldn't be parsed")
+	}
+	websiteName := matches[1]
 
-	websiteName := regex.FindStringSubmatch(hostname)[1]
+	var website types.Website
 	switch websiteName {
 	case "codeforces":
-		return types.Codeforces
+		website = types.Codeforces
 	case "atcoder":
-		return types.Atcoder
+		website = types.Atcoder
 	default:
-		return types.Invalid
+		return types.Invalid, errors.New("website not supported")
 	}
+
+	return website, nil
 }
 
 // GetContest returns a Contest parsed from the URL
 func GetContest(rawurl string) (types.Contest, error) {
-	parsedURL, parseErr := url.Parse(rawurl)
-	if parseErr != nil {
-		return nil, parseErr
+	parsedURL, parseURLError := url.Parse(rawurl)
+	if parseURLError != nil {
+		return nil, parseURLError
 	}
 
-	website := getWebsiteFromHostname(parsedURL.Hostname())
-	contestID := getContestIDFromPath(parsedURL.EscapedPath(), website)
+	website, websiteParsingError := getWebsiteFromHostname(parsedURL.Hostname())
+	if websiteParsingError != nil {
+		return nil, websiteParsingError
+	}
 
-	var contest types.Contest
-	var err error
+	contestID, contestIDError := getContestIDFromPath(parsedURL.EscapedPath(), website)
+	if contestIDError != nil {
+		return nil, contestIDError
+	}
+
 	switch website {
 	case types.Atcoder:
-		contest, err = GetAtcoderProblems(contestID)
+		return GetAtcoderProblems(contestID)
 	case types.Codeforces:
-		contest, err = GetCodeforcesProblems(contestID)
-	default:
-		contest, err = nil, errors.New("website not supported")
+		return GetCodeforcesProblems(contestID)
 	}
 
-	return contest, err
+	return nil, errors.New("something that wasn't supposed to go wrong went wrong")
 }
 
-func getContestIDFromPath(path string, website types.Website) string {
+func getContestIDFromPath(path string, website types.Website) (string, error) {
+	var matches []string
 	switch website {
 	case types.Atcoder:
 		regex := regexp.MustCompile(`/contests/(\w+)`)
-		return regex.FindStringSubmatch(path)[1]
+		matches = regex.FindStringSubmatch(path)
 	case types.Codeforces:
 		regex := regexp.MustCompile(`/contest/(\w+)`)
-		return regex.FindStringSubmatch(path)[1]
-	default:
-		return ""
+		matches = regex.FindStringSubmatch(path)
 	}
+
+	if len(matches) != 2 {
+		return "", errors.New("contest ID not found")
+	}
+	contestID := matches[1]
+
+	return contestID, nil
 }
