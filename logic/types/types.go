@@ -2,6 +2,7 @@ package types
 
 // ProblemInfo is the problem's metadata
 type ProblemInfo struct {
+	Website Website
 	Contest string
 	Problem string
 	URL     string

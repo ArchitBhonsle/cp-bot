@@ -68,6 +68,7 @@ func (p *AtcoderProblem) Fetch(send chan *types.FetchedProblem) {
 // GetInfo returns the corresponding problem's metadata
 func (p *AtcoderProblem) GetInfo() *types.ProblemInfo {
 	return &types.ProblemInfo{
+		Website: types.Atcoder,
 		Contest: p.contest,
 		Problem: p.problem,
 		URL:     p.url,

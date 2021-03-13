@@ -62,6 +62,7 @@ func (p *CodeforcesProblem) Fetch(send chan *types.FetchedProblem) {
 // GetInfo returns the corresponding problem's metadata
 func (p *CodeforcesProblem) GetInfo() *types.ProblemInfo {
 	return &types.ProblemInfo{
+		Website: types.Codeforces,
 		Contest: p.contest,
 		Problem: p.problem,
 		URL:     p.url,

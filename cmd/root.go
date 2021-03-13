@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/ArchitBhonsle/cp-bot/logic/fileops"
 	"github.com/ArchitBhonsle/cp-bot/logic/scraping"
 	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
@@ -48,7 +49,10 @@ var rootCmd = &cobra.Command{
 	`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		contest, _ := scraping.GetContest(args[0])
+		println(viper.GetString("directory"), viper.GetString("template"))
+		contest, err := scraping.GetContest(args[0])
+		cobra.CheckErr(err)
+
 		send := make(chan *types.FetchedProblem, len(contest))
 		for _, problem := range contest {
 			go problem.Fetch(send)
@@ -56,15 +60,7 @@ var rootCmd = &cobra.Command{
 
 		for i := 1; i <= len(contest); i += 1 {
 			fetchedProblem := <-send
-			// println("--------------")
-			println(i, fetchedProblem.ProblemInfo.Contest, fetchedProblem.ProblemInfo.Problem)
-			// println("--------------")
-			// for _, testcase := range fetchedProblem.Testcases {
-			// 	println(testcase.Input)
-			// 	println("--------------")
-			// 	println(testcase.Output)
-			// 	println("--------------")
-			// }
+			println(i, fileops.ProblemPath(fetchedProblem.ProblemInfo))
 		}
 	},
 }
@@ -94,9 +90,8 @@ func initConfig() {
 		// Search config in home directory with name ".cp-bot" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".cp-bot")
+		viper.SetConfigType("yaml")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
