@@ -23,7 +23,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"path"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -47,6 +47,7 @@ cp-bot atcoder.jp/contests/arc114/
 	`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		println(viper.GetString("directory"), viper.GetString("template"))
 		contest, err := scraping.GetContest(args[0])
 		if err != nil {
 			return err
@@ -61,12 +62,12 @@ cp-bot atcoder.jp/contests/arc114/
 			fetchedProblem := <-send
 			println("------------")
 			println(i, fileops.ProblemPath(fetchedProblem.ProblemInfo))
-			for _, testcase := range fetchedProblem.Testcases {
-				println("------------")
-				println(testcase.Input)
-				println(testcase.Output)
-				println("------------")
-			}
+			// for _, testcase := range fetchedProblem.Testcases {
+			// 	println("------------")
+			// 	println(testcase.Input)
+			// 	println(testcase.Output)
+			// 	println("------------")
+			// }
 		}
 
 		return nil
@@ -78,9 +79,18 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	home, err := homedir.Dir()
+	cobra.CheckErr(err)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cp-bot.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default \"%v\")", path.Join(home, ".cp-bot")))
+
+	rootCmd.PersistentFlags().StringP("directory", "d", path.Join(home, "cp"), "the directory to use")
+	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))
+
+	rootCmd.PersistentFlags().StringP("template", "t", path.Join(home, "cp", "template.cpp"), "the template to use")
+	viper.BindPFlag("template", rootCmd.PersistentFlags().Lookup("template"))
+
+	cobra.OnInitialize(initConfig)
 }
 
 func initConfig() {
@@ -90,14 +100,17 @@ func initConfig() {
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
+		viper.SetConfigType("yaml")
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".cp-bot")
-		viper.SetConfigType("yaml")
 	}
 
+	viper.SetEnvPrefix("CPB")
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			cobra.CheckErr(err)
+		}
 	}
 }
