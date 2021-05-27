@@ -1,22 +1,24 @@
 package fileops
 
 import (
-	"fmt"
+	"path"
 
 	"github.com/ArchitBhonsle/cp-bot/logic/types"
 )
 
 // ProblemPath gets the path corresponding to the given problem
-func ProblemPath(problemInfo *types.ProblemInfo) string {
+func ProblemPath(p *types.FetchedProblem) string {
+	problemInfo := p.ProblemInfo
+
 	var website string
 	switch problemInfo.Website {
 	case types.Atcoder:
 		website = "atcoder"
 	case types.Codeforces:
-		website = "coderforces"
+		website = "codeforces"
 	}
 
-	path := fmt.Sprintf("%v/%v/%v", website, problemInfo.Contest, problemInfo.Problem)
+	problemPath := path.Join(website, problemInfo.Contest, problemInfo.Problem)
 
-	return path
+	return problemPath
 }

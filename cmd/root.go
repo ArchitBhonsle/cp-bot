@@ -60,15 +60,16 @@ cp-bot atcoder.jp/contests/arc114/
 
 		for i := 1; i <= len(contest); i += 1 {
 			fetchedProblem := <-send
-			println("------------")
-			println(i, fileops.ProblemPath(fetchedProblem.ProblemInfo))
-			for _, testcase := range fetchedProblem.Testcases {
-				println("------------")
-				println(testcase.Input)
-				println("------------")
-				println(testcase.Output)
-				println("------------")
-			}
+			fileops.CreateFiles(fetchedProblem)
+			// println("------------")
+			// println(i, fileops.ProblemPath(fetchedProblem))
+			// for _, testcase := range fetchedProblem.Testcases {
+			// 	println("------------")
+			// 	println(testcase.Input)
+			// 	println("------------")
+			// 	println(testcase.Output)
+			// 	println("------------")
+			// }
 		}
 
 		return nil
