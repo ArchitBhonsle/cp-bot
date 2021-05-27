@@ -62,12 +62,13 @@ cp-bot atcoder.jp/contests/arc114/
 			fetchedProblem := <-send
 			println("------------")
 			println(i, fileops.ProblemPath(fetchedProblem.ProblemInfo))
-			// for _, testcase := range fetchedProblem.Testcases {
-			// 	println("------------")
-			// 	println(testcase.Input)
-			// 	println(testcase.Output)
-			// 	println("------------")
-			// }
+			for _, testcase := range fetchedProblem.Testcases {
+				println("------------")
+				println(testcase.Input)
+				println("------------")
+				println(testcase.Output)
+				println("------------")
+			}
 		}
 
 		return nil

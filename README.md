@@ -1,8 +1,11 @@
 # cp-bot
+
 A tool using golang for simplifying the process of participating in a competitive programming contest.
 
 # working
+
 The tool will generate a directory structure as follows:
+
 ```
 contest
   |- problem a
@@ -16,6 +19,7 @@ contest
   | ...
   |- run.sh
 ```
+
 1. `contest` is the main directory named after some unique identifier used by the cp platform.
 2. `problem a` will be named after the unique identifier used by the cp platform.
 3. `solution.cpp` is the main file containing the solution containing your template.
@@ -25,6 +29,7 @@ contest
 7. `run.sh` will run the specified program against all the `i` files and diff the `o` with the `e`.
 
 # goals
-1. Support Codeforces, CodeChef and AtCoder.
+
+1. Support Codeforces and AtCoder.
 2. Support CPlusPlus and Python.
-3. `rus.batch` for windows support.
+3. `run.batch` for windows support.

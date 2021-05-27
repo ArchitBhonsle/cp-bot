@@ -28,7 +28,7 @@ func GetCodeforcesProblems(contestID string) (types.Contest, error) {
 	collector.OnError(func(_r *colly.Response, collyError error) {
 		err = collyError
 	})
-	
+
 	collector.OnHTML(cfProblemsSelector, func(e *colly.HTMLElement) {
 		contest = append(contest, &CodeforcesProblem{
 			contest: contestID,
@@ -47,16 +47,28 @@ const cfTestcasesSelector = "div.sample-tests div.sample-test"
 // Scrape will get the problem's inputs and corresponding outputs
 func (p *CodeforcesProblem) Fetch(send chan *types.FetchedProblem) {
 	var testcases []types.Testcase
+	var inputs []string
+	var outputs []string
 	collector := colly.NewCollector()
 
 	collector.OnHTML(cfTestcasesSelector, func(e *colly.HTMLElement) {
-		testcases = append(testcases, types.Testcase{
-			Input:  strings.Trim(e.ChildText(".input > pre"), " \n"),
-			Output: strings.Trim(e.ChildText(".output > pre"), " \n"),
+		e.ForEach(".input > pre", func(idx int, ce *colly.HTMLElement) {
+			inputs = append(inputs, strings.Trim(ce.Text, " \n"))
+		})
+		e.ForEach(".output > pre", func(idx int, ce *colly.HTMLElement) {
+			outputs = append(outputs, strings.Trim(ce.Text, " \n"))
 		})
 	})
 
 	collector.Visit(p.url)
+
+	// TODO add len(inputs) == len(outputs) check
+	for i := 0; i < len(inputs); i += 1 {
+		testcases = append(testcases, types.Testcase{
+			Input:  inputs[i],
+			Output: outputs[i],
+		})
+	}
 
 	send <- &types.FetchedProblem{
 		ProblemInfo: p.GetInfo(),
