@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 # cp-bot
 
+=======
+# cp-bot (INCOMPLETE)
+>>>>>>> fdf39c430c36ee81cc22c496529198ebdcfe7b40
 A tool using golang for simplifying the process of participating in a competitive programming contest.
 
 # working
