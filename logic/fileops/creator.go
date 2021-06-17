@@ -2,6 +2,7 @@ package fileops
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Create files given a FetchedProblem create all it's corresponding files
+// CreateFiles given a FetchedProblem create all it's corresponding files
 func CreateFiles(p *types.FetchedProblem) {
 	problemPath := path.Join(viper.GetString("directory"), problemPath(p))
 	os.MkdirAll(problemPath, os.ModePerm)
@@ -17,6 +18,14 @@ func CreateFiles(p *types.FetchedProblem) {
 	for index, testcase := range p.Testcases {
 		createTestcaseFiles(problemPath, index, &testcase)
 	}
+
+	templateBytes, templateErr := ioutil.ReadFile(viper.GetString("template"))
+	template := ""
+	if templateErr == nil {
+		template = string(templateBytes)
+	}
+
+	createFile(path.Join(problemPath, "sol.cpp"), template)
 }
 
 // createTestCaseFile will create the input and output files for the given

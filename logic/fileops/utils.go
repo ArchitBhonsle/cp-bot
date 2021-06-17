@@ -28,7 +28,7 @@ func problemPath(p *types.FetchedProblem) string {
 // createFile creates a file at the given filePath and fill it with the
 // specified content
 func createFile(filePath string, content string) {
-	contentAsBytes := []byte(filePath)
+	contentAsBytes := []byte(content)
 	err := ioutil.WriteFile(filePath, contentAsBytes, 0644)
 	cobra.CheckErr(err)
 }
