@@ -47,7 +47,6 @@ cp-bot atcoder.jp/contests/arc114/
 	`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		println(viper.GetString("directory"), viper.GetString("template"))
 		contest, err := scraping.GetContest(args[0])
 		if err != nil {
 			return err
@@ -61,15 +60,6 @@ cp-bot atcoder.jp/contests/arc114/
 		for i := 1; i <= len(contest); i += 1 {
 			fetchedProblem := <-send
 			fileops.CreateFiles(fetchedProblem)
-			// println("------------")
-			// println(i, fileops.ProblemPath(fetchedProblem))
-			// for _, testcase := range fetchedProblem.Testcases {
-			// 	println("------------")
-			// 	println(testcase.Input)
-			// 	println("------------")
-			// 	println(testcase.Output)
-			// 	println("------------")
-			// }
 		}
 
 		return nil
