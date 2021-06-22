@@ -24,7 +24,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/ArchitBhonsle/cp-bot/logic/fileops"
+	"github.com/ArchitBhonsle/cp-bot/logic/compare"
 	"github.com/spf13/cobra"
 )
 
@@ -48,9 +48,21 @@ cp-bot run /path/to/problem`,
 			problemDirectory = args[0]
 		}
 
-		errRun := fileops.Run(problemDirectory)
+		errRun := compare.Diff(problemDirectory)
 		if errRun != nil {
 			return errRun
+		}
+
+		if compileErr := compare.Compile(problemDirectory); compileErr != nil {
+			return compileErr
+		}
+
+		count, countErr := compare.CountInputs(problemDirectory)
+		if countErr != nil {
+			return nil
+		}
+		for i := 0; i < count; i++ {
+			compare.Execute(problemDirectory, i)
 		}
 
 		return nil
@@ -59,14 +71,4 @@ cp-bot run /path/to/problem`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
