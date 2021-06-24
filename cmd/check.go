@@ -56,6 +56,8 @@ cp-bot check --dir /path/to/problem`,
 			return compileErr
 		}
 
+		// TODO allow running for selected input files
+
 		// Count the number input files
 		count, countErr := check.CountInputs(problemDirectory)
 		if countErr != nil {
@@ -74,6 +76,13 @@ cp-bot check --dir /path/to/problem`,
 			}(i)
 		}
 		executeWaitGroup.Wait()
+
+		// Running the actual diff
+		// These are not delegated to go routines because the order matters! On
+		// most platforms the test cases are in increasing order of complexity
+		for i := 0; i < count; i += 1 {
+			check.Diff(problemDirectory, i)
+		}
 
 		return nil
 	},
