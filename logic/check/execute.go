@@ -1,4 +1,4 @@
-package compare
+package check
 
 import (
 	"fmt"
@@ -8,37 +8,7 @@ import (
 	"path/filepath"
 )
 
-func Diff(directory string) error {
-	return nil
-}
-
-func Compile(directory string) error {
-	solution := path.Join(directory, "sol.cpp")
-	executable := path.Join(directory, "sol")
-
-	compileCmd := exec.Command(
-    		"g++",
-		"-std=c++17",
-		"-Wshadow",
-		"-Wall",
-		fmt.Sprint("-o", executable),
-		solution,
-		"-g",
-		"-fsanitize=address",
-		"-fsanitize=undefined",
-		"-D_GLIBCXX_DEBUG",
-	)
-
-	if output, err := compileCmd.CombinedOutput(); err != nil {
-		println(string(output))
-		return err
-	}
-
-	println("Solution successfully compiled")
-
-	return nil
-}
-
+// CountInputs counts the number of input files in the current directory
 func CountInputs(directory string) (int, error) {
 	pattern := path.Join(directory, "inp*.txt")
 
@@ -50,6 +20,8 @@ func CountInputs(directory string) (int, error) {
 	return len(count), nil
 }
 
+// Execute the solution in the given directory using the specified input file
+// and pipes the output to the corressponding output file
 func Execute(directory string, inputNumber int) error {
 	executable := path.Join(directory, "sol")
 	executeCmd := exec.Command(executable)
@@ -69,7 +41,7 @@ func Execute(directory string, inputNumber int) error {
 		stdin.Write(inputBuffer)
 	}()
 
-	// Recieving output
+	// Receiving output
 	output, runtimeErr := executeCmd.CombinedOutput()
 	if runtimeErr != nil {
 		return runtimeErr
@@ -85,4 +57,3 @@ func Execute(directory string, inputNumber int) error {
 
 	return nil
 }
-

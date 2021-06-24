@@ -23,52 +23,59 @@ package cmd
 
 import (
 	"os"
+	"sync"
 
-	"github.com/ArchitBhonsle/cp-bot/logic/compare"
+	"github.com/ArchitBhonsle/cp-bot/logic/check"
 	"github.com/spf13/cobra"
 )
 
-// runCmd represents the run command
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Test the program against the input files",
-	Long: `This command command is used to run a specific solution file
-with the corressponging of input files and check the produced output against
-the expected output. Example:
+// checkCmd represents the check command
+var checkCmd = &cobra.Command{
+	Use:   "check",
+	Short: "Check the program against the input files",
+	Long: `This command command is used to check a specific solution file with the 
+corressponding of input files and diff the produced output against the expected
+output. Example:
 
-cp-bot run
-cp-bot run /path/to/problem`,
+cp-bot check
+cp-bot check /path/to/problem`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// Deciding the directory to run the command for
 		problemDirectory, errGetwd := os.Getwd()
 		if errGetwd != nil {
 			return errGetwd
 		}
-
 		if len(args) == 1 {
 			problemDirectory = args[0]
 		}
 
-		errRun := compare.Diff(problemDirectory)
-		if errRun != nil {
-			return errRun
-		}
-
-		if compileErr := compare.Compile(problemDirectory); compileErr != nil {
+		// Compile the user's solution
+		if compileErr := check.Compile(problemDirectory); compileErr != nil {
 			return compileErr
 		}
 
-		count, countErr := compare.CountInputs(problemDirectory)
+		// Count the number input files
+		count, countErr := check.CountInputs(problemDirectory)
 		if countErr != nil {
 			return nil
 		}
+
+		// Execute the solution against each of the input files
+		var executeWaitGroup sync.WaitGroup
 		for i := 0; i < count; i++ {
-			compare.Execute(problemDirectory, i)
+			executeWaitGroup.Add(1)
+
+			go func(inputNumber int) {
+				defer executeWaitGroup.Done()
+				check.Execute(problemDirectory, inputNumber)
+			}(i)
 		}
+		executeWaitGroup.Wait()
 
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(checkCmd)
 }
