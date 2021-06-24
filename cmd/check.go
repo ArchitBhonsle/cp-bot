@@ -29,6 +29,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var directoryFlag string
+
 // checkCmd represents the check command
 var checkCmd = &cobra.Command{
 	Use:   "check",
@@ -38,15 +40,15 @@ corressponding of input files and diff the produced output against the expected
 output. Example:
 
 cp-bot check
-cp-bot check /path/to/problem`,
+cp-bot check --dir /path/to/problem`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Deciding the directory to run the command for
 		problemDirectory, errGetwd := os.Getwd()
 		if errGetwd != nil {
 			return errGetwd
 		}
-		if len(args) == 1 {
-			problemDirectory = args[0]
+		if directoryFlag != "" {
+			problemDirectory = directoryFlag
 		}
 
 		// Compile the user's solution
@@ -57,7 +59,7 @@ cp-bot check /path/to/problem`,
 		// Count the number input files
 		count, countErr := check.CountInputs(problemDirectory)
 		if countErr != nil {
-			return nil
+			return countErr
 		}
 
 		// Execute the solution against each of the input files
@@ -67,6 +69,7 @@ cp-bot check /path/to/problem`,
 
 			go func(inputNumber int) {
 				defer executeWaitGroup.Done()
+				// TODO error checking here
 				check.Execute(problemDirectory, inputNumber)
 			}(i)
 		}
@@ -78,4 +81,6 @@ cp-bot check /path/to/problem`,
 
 func init() {
 	rootCmd.AddCommand(checkCmd)
+
+	rootCmd.PersistentFlags().StringVar(&directoryFlag, "dir", "", "directory to run command on")
 }

@@ -7,6 +7,7 @@ import (
 )
 
 // Compile compiles the solution in the specified directory
+// TODO support more languages
 func Compile(directory string) error {
 	solution := path.Join(directory, "sol.cpp")
 	executable := path.Join(directory, "sol")

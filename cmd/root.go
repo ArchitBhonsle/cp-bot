@@ -74,13 +74,21 @@ func init() {
 	home, err := homedir.Dir()
 	cobra.CheckErr(err)
 
+	// Which config file to use
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default \"%v\")", path.Join(home, ".cp-bot")))
 
-	rootCmd.PersistentFlags().StringP("directory", "d", path.Join(home, "cp"), "the directory to use")
+	// Which directory to use for competitive programming
+	rootCmd.PersistentFlags().StringP("directory", "d", path.Join(home, "cp"), "the directory to use for competitive programming")
 	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))
 
+	// Which template to use
 	rootCmd.PersistentFlags().StringP("template", "t", path.Join(home, "cp", "template.cpp"), "the template to use")
 	viper.BindPFlag("template", rootCmd.PersistentFlags().Lookup("template"))
+
+	// Whether to print various statements
+	// TODO actually use this
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 
 	cobra.OnInitialize(initConfig)
 }
