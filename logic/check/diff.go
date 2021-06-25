@@ -19,13 +19,18 @@ func Diff(directory string, inputNumber int) error {
 	if err != nil {
 		return nil
 	}
+	if terminalWidth > 80 {
+		terminalWidth = 80
+	}
+
 	diffOutput, err := exec.Command(
 		"diff",
 		outFile,
 		expFile,
-		"-b",
-		"-y",
 		fmt.Sprintf("--width=%v", terminalWidth-2),
+		"--side-by-side",
+		"--ignore-space-change",
+		"--ignore-trailing-space",
 	).CombinedOutput()
 	if err != nil {
 		switch err.(type) {
@@ -35,13 +40,23 @@ func Diff(directory string, inputNumber int) error {
 		}
 	}
 
+	if err == nil {
+		diffOutput = nil
+	}
 	formatOutput(inputNumber, string(diffOutput), terminalWidth)
+	fmt.Print(drawing.Reset)
 
 	return nil
 }
 
 func formatOutput(inputNumber int, output string, terminalWidth int) {
 	spaces := strings.Repeat(" ", terminalWidth-12)
+
+	if output == "" {
+		print(drawing.Green)
+	} else {
+		print(drawing.Red)
+	}
 
 	println(drawing.HorizontalTop(terminalWidth))
 
@@ -54,6 +69,8 @@ func formatOutput(inputNumber int, output string, terminalWidth int) {
 	)
 
 	println(drawing.HorizontalBottom(terminalWidth))
+
+	print(drawing.Reset)
 
 	println(output)
 }

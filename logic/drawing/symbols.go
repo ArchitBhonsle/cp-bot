@@ -1,13 +1,13 @@
 package drawing
 
-var Vertical string = "│"
-var Horizontal string = "─"
+var Vertical = "│"
+var Horizontal = "─"
 
-var TopLeft string = "╭"
-var TopRight string = "╮"
+var TLCorner = "╭"
+var TRCorner = "╮"
 
-var BottomLeft string = "╰"
-var BottomRight string = "╯"
+var BLCorner = "╰"
+var BRCorner = "╯"
 
-var LeftHorizontalIntersection = "├"
-var RightHorizontalIntersection = "┤"
+var LMIntersection = "├"
+var RMIntersection = "┤"
