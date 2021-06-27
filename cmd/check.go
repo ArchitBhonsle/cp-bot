@@ -40,7 +40,7 @@ corressponding of input files and diff the produced output against the expected
 output. Example:
 
 cp-bot check
-cp-bot check --dir /path/to/problem`,
+cp-bot check --problem-directory /path/to/problem`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Deciding the directory to run the command for
 		problemDirectory, errGetwd := os.Getwd()
@@ -91,5 +91,5 @@ cp-bot check --dir /path/to/problem`,
 func init() {
 	rootCmd.AddCommand(checkCmd)
 
-	rootCmd.PersistentFlags().StringVar(&directoryFlag, "dir", "", "directory to run command on")
+	rootCmd.PersistentFlags().StringVarP(&directoryFlag, "problem-directory", "p", "", "directory to run command on")
 }

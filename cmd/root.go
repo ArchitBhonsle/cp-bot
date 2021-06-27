@@ -101,8 +101,8 @@ func initConfig() {
 		cobra.CheckErr(err)
 
 		viper.SetConfigType("yaml")
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".cp-bot")
+		viper.AddConfigPath(path.Join(home, ".config", "cp-bot"))
+		viper.SetConfigName("config.yaml")
 	}
 
 	viper.SetEnvPrefix("CPB")
